@@ -1,4 +1,60 @@
--- HUB KEY SYSTEM ROBLOX
+-- Status da key
+    local keyStatus = Instance.new("TextLabel")
+    keyStatus.Name = "KeyStatus"
+    keyStatus.Parent = keyFrame
+    keyStatus.Position = UDim2.new(0, 30, 0, 120)
+    keyStatus.Size = UDim2.new(1, -60, 0, 25)
+    keyStatus.BackgroundTransparency = 1
+    keyStatus.Text = "Aguardando inserção da chave..."
+    keyStatus.TextColor3 = Color3.fromRGB(150, 150, 150)
+    keyStatus.TextSize = 11
+    keyStatus.TextXAlignment = Enum.TextXAlignment.Left
+    keyStatus.Font = Enum.Font.Gotham
+    keyStatus.Visible = true
+    
+    -- Função para alternar entre abas
+    local function switchToTab(targetFrame, activeButton)
+        -- Esconder todas as abas
+        keyFrame.Visible = false
+        configFrame.Visible = false
+        
+        -- Mostrar aba selecionada
+        targetFrame.Visible = true
+        
+        -- Atualizar cores dos botões da sidebar
+        for _, button in pairs(sidebar:GetChildren()) do
+            if button:IsA("TextButton") then
+                button.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+                local icon = button:FindFirstChild("Icon")
+                local text = button:FindFirstChild("Text")
+                if icon then icon.TextColor3 = Color3.fromRGB(150, 150, 150) end
+                if text then text.TextColor3 = Color3.fromRGB(150, 150, 150) end
+            end
+        end
+        
+        -- Destacar botão ativo
+        activeButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+        local activeIcon = activeButton:FindFirstChild("Icon")
+        local activeText = activeButton:FindFirstChild("Text")
+        if activeIcon then activeIcon.TextColor3 = Color3.fromRGB(255, 255, 255) end
+        if activeText then activeText.TextColor3 = Color3.fromRGB(255, 255, 255) end
+    end
+    
+    -- Eventos dos botões da sidebar
+    keyButton.MouseButton1Click:Connect(function()
+        switchToTab(keyFrame, keyButton)
+    end)
+    
+    configButton.MouseButton1Click:Connect(function()
+        switchToTab(configFrame, configButton)
+    end)
+    
+    discordButton.MouseButton1Click:Connect(function()
+        -- Criar frame de Discord (placeholder)
+        keyStatus.Text = "🔗 Link do Discord: discord.gg/exemplo"
+        keyStatus.TextColor3 = Color3.fromRGB(100, 150, 255)
+        switchToTab(keyFrame, discordButton)
+    end)-- HUB KEY SYSTEM ROBLOX
 -- Sistema de chave de acesso inspirado na interface mostrada
 -- Criado por Claude AI
 
@@ -171,6 +227,11 @@ local function createKeySystem()
     local discordButton = createSidebarButton("Nosso Discord", "💬", 2, false)
     local configButton = createSidebarButton("Configurações", "⚙️", 3, false)
     
+    -- Variáveis de configuração
+    local currentColor = Color3.fromRGB(24, 24, 24)
+    local currentTransparency = 0
+    local isMinimized = false
+    
     -- Área de conteúdo principal
     local contentFrame = Instance.new("Frame")
     contentFrame.Name = "ContentFrame"
@@ -242,19 +303,215 @@ local function createKeySystem()
     inputButtonCorner.CornerRadius = UDim.new(0, 4)
     inputButtonCorner.Parent = inputButton
     
-    -- Status da key
-    local keyStatus = Instance.new("TextLabel")
-    keyStatus.Name = "KeyStatus"
-    keyStatus.Parent = keyFrame
-    keyStatus.Position = UDim2.new(0, 30, 0, 120)
-    keyStatus.Size = UDim2.new(1, -60, 0, 25)
-    keyStatus.BackgroundTransparency = 1
-    keyStatus.Text = "Aguardando inserção da chave..."
-    keyStatus.TextColor3 = Color3.fromRGB(150, 150, 150)
-    keyStatus.TextSize = 11
-    keyStatus.TextXAlignment = Enum.TextXAlignment.Left
-    keyStatus.Font = Enum.Font.Gotham
-    keyStatus.Visible = true
+    -- Frame de Configurações
+    local configFrame = Instance.new("Frame")
+    configFrame.Name = "ConfigFrame"
+    configFrame.Parent = contentFrame
+    configFrame.Size = UDim2.new(1, 0, 1, 0)
+    configFrame.BackgroundTransparency = 1
+    configFrame.Visible = false
+    
+    -- Título das Configurações
+    local configTitle = Instance.new("TextLabel")
+    configTitle.Name = "ConfigTitle"
+    configTitle.Parent = configFrame
+    configTitle.Position = UDim2.new(0, 30, 0, 20)
+    configTitle.Size = UDim2.new(1, -60, 0, 30)
+    configTitle.BackgroundTransparency = 1
+    configTitle.Text = "⚙️ Configurações do Hub"
+    configTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    configTitle.TextSize = 16
+    configTitle.TextXAlignment = Enum.TextXAlignment.Left
+    configTitle.Font = Enum.Font.GothamBold
+    
+    -- Seção Cor do Hub
+    local colorSection = Instance.new("Frame")
+    colorSection.Name = "ColorSection"
+    colorSection.Parent = configFrame
+    colorSection.Position = UDim2.new(0, 30, 0, 70)
+    colorSection.Size = UDim2.new(1, -60, 0, 120)
+    colorSection.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+    
+    local colorSectionCorner = Instance.new("UICorner")
+    colorSectionCorner.CornerRadius = UDim.new(0, 6)
+    colorSectionCorner.Parent = colorSection
+    
+    -- Título da seção cor
+    local colorSectionTitle = Instance.new("TextLabel")
+    colorSectionTitle.Name = "ColorSectionTitle"
+    colorSectionTitle.Parent = colorSection
+    colorSectionTitle.Position = UDim2.new(0, 15, 0, 10)
+    colorSectionTitle.Size = UDim2.new(1, -30, 0, 25)
+    colorSectionTitle.BackgroundTransparency = 1
+    colorSectionTitle.Text = "🎨 Cor do Hub"
+    colorSectionTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    colorSectionTitle.TextSize = 14
+    colorSectionTitle.TextXAlignment = Enum.TextXAlignment.Left
+    colorSectionTitle.Font = Enum.Font.GothamBold
+    
+    -- Botões de cores predefinidas
+    local colors = {
+        {name = "Padrão", color = Color3.fromRGB(24, 24, 24)},
+        {name = "Azul", color = Color3.fromRGB(24, 24, 50)},
+        {name = "Roxo", color = Color3.fromRGB(40, 24, 50)},
+        {name = "Verde", color = Color3.fromRGB(24, 40, 24)},
+        {name = "Vermelho", color = Color3.fromRGB(50, 24, 24)}
+    }
+    
+    for i, colorData in pairs(colors) do
+        local colorButton = Instance.new("TextButton")
+        colorButton.Name = colorData.name .. "Button"
+        colorButton.Parent = colorSection
+        colorButton.Position = UDim2.new(0, 15 + (i-1) * 75, 0, 45)
+        colorButton.Size = UDim2.new(0, 65, 0, 30)
+        colorButton.BackgroundColor3 = colorData.color
+        colorButton.Text = colorData.name
+        colorButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        colorButton.TextSize = 10
+        colorButton.Font = Enum.Font.Gotham
+        
+        local colorButtonCorner = Instance.new("UICorner")
+        colorButtonCorner.CornerRadius = UDim.new(0, 4)
+        colorButtonCorner.Parent = colorButton
+        
+        -- Evento do botão de cor
+        colorButton.MouseButton1Click:Connect(function()
+            currentColor = colorData.color
+            mainFrame.BackgroundColor3 = currentColor
+            contentFrame.BackgroundColor3 = currentColor
+            
+            -- Atualizar outras partes do hub com a nova cor
+            for _, child in pairs(mainFrame:GetDescendants()) do
+                if child.Name == "KeyFrame" or child.Name == "ConfigFrame" then
+                    child.BackgroundColor3 = currentColor
+                end
+            end
+        end)
+    end
+    
+    -- Seção Transparência
+    local transparencySection = Instance.new("Frame")
+    transparencySection.Name = "TransparencySection"
+    transparencySection.Parent = configFrame
+    transparencySection.Position = UDim2.new(0, 30, 0, 210)
+    transparencySection.Size = UDim2.new(1, -60, 0, 80)
+    transparencySection.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+    
+    local transparencySectionCorner = Instance.new("UICorner")
+    transparencySectionCorner.CornerRadius = UDim.new(0, 6)
+    transparencySectionCorner.Parent = transparencySection
+    
+    -- Título da seção transparência
+    local transparencySectionTitle = Instance.new("TextLabel")
+    transparencySectionTitle.Name = "TransparencySectionTitle"
+    transparencySectionTitle.Parent = transparencySection
+    transparencySectionTitle.Position = UDim2.new(0, 15, 0, 10)
+    transparencySectionTitle.Size = UDim2.new(1, -30, 0, 25)
+    transparencySectionTitle.BackgroundTransparency = 1
+    transparencySectionTitle.Text = "👁️ Transparência"
+    transparencySectionTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    transparencySectionTitle.TextSize = 14
+    transparencySectionTitle.TextXAlignment = Enum.TextXAlignment.Left
+    transparencySectionTitle.Font = Enum.Font.GothamBold
+    
+    -- Slider de transparência
+    local transparencySlider = Instance.new("Frame")
+    transparencySlider.Name = "TransparencySlider"
+    transparencySlider.Parent = transparencySection
+    transparencySlider.Position = UDim2.new(0, 15, 0, 45)
+    transparencySlider.Size = UDim2.new(1, -150, 0, 20)
+    transparencySlider.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    
+    local transparencySliderCorner = Instance.new("UICorner")
+    transparencySliderCorner.CornerRadius = UDim.new(0, 10)
+    transparencySliderCorner.Parent = transparencySlider
+    
+    -- Handle do slider
+    local transparencyHandle = Instance.new("TextButton")
+    transparencyHandle.Name = "TransparencyHandle"
+    transparencyHandle.Parent = transparencySlider
+    transparencyHandle.Position = UDim2.new(0, 0, 0, 0)
+    transparencyHandle.Size = UDim2.new(0, 20, 1, 0)
+    transparencyHandle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    transparencyHandle.Text = ""
+    
+    local transparencyHandleCorner = Instance.new("UICorner")
+    transparencyHandleCorner.CornerRadius = UDim.new(0, 10)
+    transparencyHandleCorner.Parent = transparencyHandle
+    
+    -- Label do valor da transparência
+    local transparencyValue = Instance.new("TextLabel")
+    transparencyValue.Name = "TransparencyValue"
+    transparencyValue.Parent = transparencySection
+    transparencyValue.Position = UDim2.new(1, -120, 0, 45)
+    transparencyValue.Size = UDim2.new(0, 100, 0, 20)
+    transparencyValue.BackgroundTransparency = 1
+    transparencyValue.Text = "0%"
+    transparencyValue.TextColor3 = Color3.fromRGB(255, 255, 255)
+    transparencyValue.TextSize = 12
+    transparencyValue.TextXAlignment = Enum.TextXAlignment.Center
+    transparencyValue.Font = Enum.Font.Gotham
+    
+    -- Função do slider
+    local dragging = false
+    transparencyHandle.MouseButton1Down:Connect(function()
+        dragging = true
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local mouse = UserInputService:GetMouseLocation()
+            local sliderPos = transparencySlider.AbsolutePosition
+            local sliderSize = transparencySlider.AbsoluteSize
+            
+            local relativeX = math.clamp(mouse.X - sliderPos.X, 0, sliderSize.X)
+            local percentage = relativeX / sliderSize.X
+            
+            transparencyHandle.Position = UDim2.new(percentage, -10, 0, 0)
+            currentTransparency = percentage * 0.8 -- Máximo 80% transparência
+            
+            -- Aplicar transparência
+            mainFrame.BackgroundTransparency = currentTransparency
+            
+            -- Atualizar label
+            transparencyValue.Text = math.floor(percentage * 100) .. "%"
+        end
+    end)
+    
+    -- Botão Minimizar Hub
+    local minimizeHubButton = Instance.new("TextButton")
+    minimizeHubButton.Name = "MinimizeHubButton"
+    minimizeHubButton.Parent = configFrame
+    minimizeHubButton.Position = UDim2.new(0, 30, 1, -60)
+    minimizeHubButton.Size = UDim2.new(0, 200, 0, 40)
+    minimizeHubButton.BackgroundColor3 = Color3.fromRGB(255, 150, 50)
+    minimizeHubButton.Text = "📱 Minimizar Hub"
+    minimizeHubButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    minimizeHubButton.TextSize = 14
+    minimizeHubButton.Font = Enum.Font.GothamBold
+    
+    local minimizeHubCorner = Instance.new("UICorner")
+    minimizeHubCorner.CornerRadius = UDim.new(0, 6)
+    minimizeHubCorner.Parent = minimizeHubButton
+    
+    -- Evento do botão minimizar hub
+    minimizeHubButton.MouseButton1Click:Connect(function()
+        if isMinimized then
+            mainFrame:TweenSize(UDim2.new(0, 600, 0, 350), "Out", "Quad", 0.3)
+            minimizeHubButton.Text = "📱 Minimizar Hub"
+            isMinimized = false
+        else
+            mainFrame:TweenSize(UDim2.new(0, 600, 0, 45), "Out", "Quad", 0.3)
+            minimizeHubButton.Text = "📱 Expandir Hub"
+            isMinimized = true
+        end
+    end)
     
     -- Frame do usuário (canto inferior esquerdo)
     local userFrame = Instance.new("Frame")
