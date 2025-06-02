@@ -1,0 +1,547 @@
+-- HUB KEY SYSTEM ROBLOX
+-- Sistema de chave de acesso inspirado na interface mostrada
+-- Criado por Claude AI
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Chaves válidas (você pode modificar estas)
+local validKeys = {
+    "SCRIPTHUB2024",
+    "PREMIUM123",
+    "VIPACCESS",
+    "ARTHUB2024"
+}
+
+-- Função para verificar se a key é válida
+local function isValidKey(key)
+    for _, validKey in pairs(validKeys) do
+        if key == validKey then
+            return true
+        end
+    end
+    return false
+end
+
+-- Função para criar a interface de key
+local function createKeySystem()
+    -- ScreenGui principal
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "HubKeySystem"
+    screenGui.Parent = playerGui
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    
+    -- Frame principal
+    local mainFrame = Instance.new("Frame")
+    mainFrame.Name = "MainFrame"
+    mainFrame.Parent = screenGui
+    mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+    mainFrame.Size = UDim2.new(0, 600, 0, 350)
+    mainFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+    mainFrame.BorderSizePixel = 0
+    mainFrame.Active = true
+    mainFrame.Draggable = true
+    
+    -- Cantos arredondados
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 8)
+    corner.Parent = mainFrame
+    
+    -- Header
+    local header = Instance.new("Frame")
+    header.Name = "Header"
+    header.Parent = mainFrame
+    header.Size = UDim2.new(1, 0, 0, 45)
+    header.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+    header.BorderSizePixel = 0
+    
+    local headerCorner = Instance.new("UICorner")
+    headerCorner.CornerRadius = UDim.new(0, 8)
+    headerCorner.Parent = header
+    
+    -- Título
+    local title = Instance.new("TextLabel")
+    title.Name = "Title"
+    title.Parent = header
+    title.Position = UDim2.new(0, 15, 0, 0)
+    title.Size = UDim2.new(0, 200, 1, 0)
+    title.BackgroundTransparency = 1
+    title.Text = "Hub Key System"
+    title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    title.TextSize = 16
+    title.TextXAlignment = Enum.TextXAlignment.Left
+    title.Font = Enum.Font.GothamMedium
+    
+    -- Botão minimizar
+    local minimizeButton = Instance.new("TextButton")
+    minimizeButton.Name = "MinimizeButton"
+    minimizeButton.Parent = header
+    minimizeButton.AnchorPoint = Vector2.new(1, 0)
+    minimizeButton.Position = UDim2.new(1, -50, 0, 10)
+    minimizeButton.Size = UDim2.new(0, 25, 0, 25)
+    minimizeButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    minimizeButton.Text = "—"
+    minimizeButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+    minimizeButton.TextSize = 14
+    minimizeButton.Font = Enum.Font.GothamMedium
+    
+    local minimizeCorner = Instance.new("UICorner")
+    minimizeCorner.CornerRadius = UDim.new(0, 4)
+    minimizeCorner.Parent = minimizeButton
+    
+    -- Botão fechar
+    local closeButton = Instance.new("TextButton")
+    closeButton.Name = "CloseButton"
+    closeButton.Parent = header
+    closeButton.AnchorPoint = Vector2.new(1, 0)
+    closeButton.Position = UDim2.new(1, -15, 0, 10)
+    closeButton.Size = UDim2.new(0, 25, 0, 25)
+    closeButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    closeButton.Text = "✕"
+    closeButton.TextColor3 = Color3.fromRGB(200, 200, 200)
+    closeButton.TextSize = 14
+    closeButton.Font = Enum.Font.GothamMedium
+    
+    local closeCorner = Instance.new("UICorner")
+    closeCorner.CornerRadius = UDim.new(0, 4)
+    closeCorner.Parent = closeButton
+    
+    -- Sidebar
+    local sidebar = Instance.new("Frame")
+    sidebar.Name = "Sidebar"
+    sidebar.Parent = mainFrame
+    sidebar.Position = UDim2.new(0, 0, 0, 45)
+    sidebar.Size = UDim2.new(0, 150, 1, -45)
+    sidebar.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
+    sidebar.BorderSizePixel = 0
+    
+    -- Lista da sidebar
+    local sidebarList = Instance.new("UIListLayout")
+    sidebarList.Parent = sidebar
+    sidebarList.SortOrder = Enum.SortOrder.LayoutOrder
+    
+    -- Função para criar botão da sidebar
+    local function createSidebarButton(text, icon, layoutOrder, isActive)
+        local button = Instance.new("TextButton")
+        button.Name = text .. "Button"
+        button.Parent = sidebar
+        button.Size = UDim2.new(1, 0, 0, 45)
+        button.BackgroundColor3 = isActive and Color3.fromRGB(35, 35, 35) or Color3.fromRGB(18, 18, 18)
+        button.BorderSizePixel = 0
+        button.Text = ""
+        button.LayoutOrder = layoutOrder
+        
+        -- Ícone
+        local iconLabel = Instance.new("TextLabel")
+        iconLabel.Name = "Icon"
+        iconLabel.Parent = button
+        iconLabel.Position = UDim2.new(0, 15, 0, 0)
+        iconLabel.Size = UDim2.new(0, 20, 1, 0)
+        iconLabel.BackgroundTransparency = 1
+        iconLabel.Text = icon
+        iconLabel.TextColor3 = isActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 150, 150)
+        iconLabel.TextSize = 16
+        iconLabel.TextXAlignment = Enum.TextXAlignment.Left
+        iconLabel.Font = Enum.Font.GothamMedium
+        
+        -- Texto
+        local textLabel = Instance.new("TextLabel")
+        textLabel.Name = "Text"
+        textLabel.Parent = button
+        textLabel.Position = UDim2.new(0, 45, 0, 0)
+        textLabel.Size = UDim2.new(1, -50, 1, 0)
+        textLabel.BackgroundTransparency = 1
+        textLabel.Text = text
+        textLabel.TextColor3 = isActive and Color3.fromRGB(255, 255, 255) or Color3.fromRGB(150, 150, 150)
+        textLabel.TextSize = 12
+        textLabel.TextXAlignment = Enum.TextXAlignment.Left
+        textLabel.Font = Enum.Font.GothamMedium
+        
+        return button
+    end
+    
+    -- Botões da sidebar
+    local keyButton = createSidebarButton("Key", "🔑", 1, true)
+    local discordButton = createSidebarButton("Nosso Discord", "💬", 2, false)
+    local configButton = createSidebarButton("Configurações", "⚙️", 3, false)
+    
+    -- Área de conteúdo principal
+    local contentFrame = Instance.new("Frame")
+    contentFrame.Name = "ContentFrame"
+    contentFrame.Parent = mainFrame
+    contentFrame.Position = UDim2.new(0, 150, 0, 45)
+    contentFrame.Size = UDim2.new(1, -150, 1, -45)
+    contentFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+    contentFrame.BorderSizePixel = 0
+    
+    -- Frame da Key
+    local keyFrame = Instance.new("Frame")
+    keyFrame.Name = "KeyFrame"
+    keyFrame.Parent = contentFrame
+    keyFrame.Size = UDim2.new(1, 0, 1, 0)
+    keyFrame.BackgroundTransparency = 1
+    keyFrame.Visible = true
+    
+    -- Título "Enter Key"
+    local enterKeyTitle = Instance.new("TextLabel")
+    enterKeyTitle.Name = "EnterKeyTitle"
+    enterKeyTitle.Parent = keyFrame
+    enterKeyTitle.Position = UDim2.new(0, 30, 0, 30)
+    enterKeyTitle.Size = UDim2.new(0, 150, 0, 30)
+    enterKeyTitle.BackgroundTransparency = 1
+    enterKeyTitle.Text = "Enter Key"
+    enterKeyTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+    enterKeyTitle.TextSize = 14
+    enterKeyTitle.TextXAlignment = Enum.TextXAlignment.Left
+    enterKeyTitle.Font = Enum.Font.GothamMedium
+    
+    -- Input da key
+    local keyInput = Instance.new("TextBox")
+    keyInput.Name = "KeyInput"
+    keyInput.Parent = keyFrame
+    keyInput.Position = UDim2.new(0, 30, 0, 70)
+    keyInput.Size = UDim2.new(1, -130, 0, 35)
+    keyInput.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+    keyInput.BorderSizePixel = 0
+    keyInput.Text = ""
+    keyInput.PlaceholderText = "Digite sua chave aqui..."
+    keyInput.TextColor3 = Color3.fromRGB(255, 255, 255)
+    keyInput.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+    keyInput.TextSize = 12
+    keyInput.Font = Enum.Font.Gotham
+    keyInput.TextXAlignment = Enum.TextXAlignment.Left
+    
+    local keyInputCorner = Instance.new("UICorner")
+    keyInputCorner.CornerRadius = UDim.new(0, 4)
+    keyInputCorner.Parent = keyInput
+    
+    local keyInputPadding = Instance.new("UIPadding")
+    keyInputPadding.Parent = keyInput
+    keyInputPadding.PaddingLeft = UDim.new(0, 10)
+    keyInputPadding.PaddingRight = UDim.new(0, 10)
+    
+    -- Botão Input
+    local inputButton = Instance.new("TextButton")
+    inputButton.Name = "InputButton"
+    inputButton.Parent = keyFrame
+    inputButton.Position = UDim2.new(1, -85, 0, 70)
+    inputButton.Size = UDim2.new(0, 70, 0, 35)
+    inputButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    inputButton.Text = "Input"
+    inputButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+    inputButton.TextSize = 12
+    inputButton.Font = Enum.Font.GothamMedium
+    
+    local inputButtonCorner = Instance.new("UICorner")
+    inputButtonCorner.CornerRadius = UDim.new(0, 4)
+    inputButtonCorner.Parent = inputButton
+    
+    -- Status da key
+    local keyStatus = Instance.new("TextLabel")
+    keyStatus.Name = "KeyStatus"
+    keyStatus.Parent = keyFrame
+    keyStatus.Position = UDim2.new(0, 30, 0, 120)
+    keyStatus.Size = UDim2.new(1, -60, 0, 25)
+    keyStatus.BackgroundTransparency = 1
+    keyStatus.Text = "Aguardando inserção da chave..."
+    keyStatus.TextColor3 = Color3.fromRGB(150, 150, 150)
+    keyStatus.TextSize = 11
+    keyStatus.TextXAlignment = Enum.TextXAlignment.Left
+    keyStatus.Font = Enum.Font.Gotham
+    keyStatus.Visible = true
+    
+    -- Frame do usuário (canto inferior esquerdo)
+    local userFrame = Instance.new("Frame")
+    userFrame.Name = "UserFrame"
+    userFrame.Parent = mainFrame
+    userFrame.Position = UDim2.new(0, 0, 1, -50)
+    userFrame.Size = UDim2.new(0, 150, 0, 50)
+    userFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    userFrame.BorderSizePixel = 0
+    
+    -- Avatar do usuário
+    local userAvatar = Instance.new("ImageLabel")
+    userAvatar.Name = "UserAvatar"
+    userAvatar.Parent = userFrame
+    userAvatar.Position = UDim2.new(0, 10, 0, 10)
+    userAvatar.Size = UDim2.new(0, 30, 0, 30)
+    userAvatar.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+    userAvatar.Image = "https://www.roblox.com/headshot-thumbnail/image?userId="..player.UserId.."&width=150&height=150&format=png"
+    
+    local avatarCorner = Instance.new("UICorner")
+    avatarCorner.CornerRadius = UDim.new(0, 15)
+    avatarCorner.Parent = userAvatar
+    
+    -- Nome do usuário
+    local userName = Instance.new("TextLabel")
+    userName.Name = "UserName"
+    userName.Parent = userFrame
+    userName.Position = UDim2.new(0, 50, 0, 5)
+    userName.Size = UDim2.new(1, -60, 0, 20)
+    userName.BackgroundTransparency = 1
+    userName.Text = "Artz_Xd"
+    userName.TextColor3 = Color3.fromRGB(255, 255, 255)
+    userName.TextSize = 12
+    userName.TextXAlignment = Enum.TextXAlignment.Left
+    userName.Font = Enum.Font.GothamBold
+    
+    -- Status do usuário
+    local userStatus = Instance.new("TextLabel")
+    userStatus.Name = "UserStatus"
+    userStatus.Parent = userFrame
+    userStatus.Position = UDim2.new(0, 50, 0, 25)
+    userStatus.Size = UDim2.new(1, -60, 0, 20)
+    userStatus.BackgroundTransparency = 1
+    userStatus.Text = "User"
+    userStatus.TextColor3 = Color3.fromRGB(120, 120, 120)
+    userStatus.TextSize = 10
+    userStatus.TextXAlignment = Enum.TextXAlignment.Left
+    userStatus.Font = Enum.Font.Gotham
+    
+    -- Função para criar o hub principal após key válida
+    local function createMainHub()
+        screenGui:Destroy()
+        
+        -- Criar novo ScreenGui para o hub
+        local hubGui = Instance.new("ScreenGui")
+        hubGui.Name = "MainScriptHub"
+        hubGui.Parent = playerGui
+        
+        -- Frame principal do hub
+        local hubFrame = Instance.new("Frame")
+        hubFrame.Name = "HubFrame"
+        hubFrame.Parent = hubGui
+        hubFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+        hubFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+        hubFrame.Size = UDim2.new(0, 700, 0, 450)
+        hubFrame.BackgroundColor3 = Color3.fromRGB(24, 24, 24)
+        hubFrame.BorderSizePixel = 0
+        hubFrame.Active = true
+        hubFrame.Draggable = true
+        
+        local hubCorner = Instance.new("UICorner")
+        hubCorner.CornerRadius = UDim.new(0, 8)
+        hubCorner.Parent = hubFrame
+        
+        -- Header do hub
+        local hubHeader = Instance.new("Frame")
+        hubHeader.Name = "HubHeader"
+        hubHeader.Parent = hubFrame
+        hubHeader.Size = UDim2.new(1, 0, 0, 45)
+        hubHeader.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+        hubHeader.BorderSizePixel = 0
+        
+        local hubHeaderCorner = Instance.new("UICorner")
+        hubHeaderCorner.CornerRadius = UDim.new(0, 8)
+        hubHeaderCorner.Parent = hubHeader
+        
+        -- Título do hub
+        local hubTitle = Instance.new("TextLabel")
+        hubTitle.Name = "HubTitle"
+        hubTitle.Parent = hubHeader
+        hubTitle.Position = UDim2.new(0, 15, 0, 0)
+        hubTitle.Size = UDim2.new(0, 300, 1, 0)
+        hubTitle.BackgroundTransparency = 1
+        hubTitle.Text = "🚀 Script Hub - Premium Access"
+        hubTitle.TextColor3 = Color3.fromRGB(255, 255, 255)
+        hubTitle.TextSize = 16
+        hubTitle.TextXAlignment = Enum.TextXAlignment.Left
+        hubTitle.Font = Enum.Font.GothamBold
+        
+        -- Botão fechar hub
+        local hubCloseButton = Instance.new("TextButton")
+        hubCloseButton.Name = "HubCloseButton"
+        hubCloseButton.Parent = hubHeader
+        hubCloseButton.AnchorPoint = Vector2.new(1, 0)
+        hubCloseButton.Position = UDim2.new(1, -15, 0, 10)
+        hubCloseButton.Size = UDim2.new(0, 25, 0, 25)
+        hubCloseButton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+        hubCloseButton.Text = "✕"
+        hubCloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        hubCloseButton.TextSize = 14
+        hubCloseButton.Font = Enum.Font.GothamMedium
+        
+        local hubCloseCorner = Instance.new("UICorner")
+        hubCloseCorner.CornerRadius = UDim.new(0, 4)
+        hubCloseCorner.Parent = hubCloseButton
+        
+        -- Área de scripts
+        local scriptsFrame = Instance.new("ScrollingFrame")
+        scriptsFrame.Name = "ScriptsFrame"
+        scriptsFrame.Parent = hubFrame
+        scriptsFrame.Position = UDim2.new(0, 20, 0, 65)
+        scriptsFrame.Size = UDim2.new(1, -40, 1, -85)
+        scriptsFrame.BackgroundTransparency = 1
+        scriptsFrame.ScrollBarThickness = 6
+        scriptsFrame.ScrollBarImageColor3 = Color3.fromRGB(60, 60, 60)
+        
+        local scriptsList = Instance.new("UIListLayout")
+        scriptsList.Parent = scriptsFrame
+        scriptsList.SortOrder = Enum.SortOrder.LayoutOrder
+        scriptsList.Padding = UDim.new(0, 10)
+        
+        -- Scripts premium
+        local premiumScripts = {
+            {name = "🚀 Super Speed", desc = "Velocidade extrema para movimento", code = "game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = 200"},
+            {name = "🦅 Advanced Fly", desc = "Sistema de voo avançado com controles", code = "loadstring(game:HttpGet('https://pastebin.com/raw/YSL3xKYU'))()"},
+            {name = "👁️ Ultimate ESP", desc = "ESP completo com informações detalhadas", code = "loadstring(game:HttpGet('https://pastebin.com/raw/MA8jhPWT'))()"},
+            {name = "🔫 Aimbot Premium", desc = "Mira automática de alta precisão", code = "loadstring(game:HttpGet('https://pastebin.com/raw/1Gp0n95T'))()"},
+            {name = "🌈 RGB Character", desc = "Personagem com efeitos de cor dinâmicos", code = "loadstring(game:HttpGet('https://pastebin.com/raw/2rMc8T5L'))()"},
+            {name = "🏃 Noclip Advanced", desc = "Atravessar paredes com controles", code = "loadstring(game:HttpGet('https://pastebin.com/raw/3nBx9K2M'))()"}
+        }
+        
+        -- Criar botões de scripts
+        for i, script in pairs(premiumScripts) do
+            local scriptItem = Instance.new("Frame")
+            scriptItem.Name = "ScriptItem" .. i
+            scriptItem.Parent = scriptsFrame
+            scriptItem.Size = UDim2.new(1, 0, 0, 70)
+            scriptItem.BackgroundColor3 = Color3.fromRGB(32, 32, 32)
+            
+            local scriptCorner = Instance.new("UICorner")
+            scriptCorner.CornerRadius = UDim.new(0, 6)
+            scriptCorner.Parent = scriptItem
+            
+            -- Nome do script
+            local scriptName = Instance.new("TextLabel")
+            scriptName.Parent = scriptItem
+            scriptName.Position = UDim2.new(0, 15, 0, 5)
+            scriptName.Size = UDim2.new(1, -120, 0, 25)
+            scriptName.BackgroundTransparency = 1
+            scriptName.Text = script.name
+            scriptName.TextColor3 = Color3.fromRGB(255, 255, 255)
+            scriptName.TextSize = 14
+            scriptName.TextXAlignment = Enum.TextXAlignment.Left
+            scriptName.Font = Enum.Font.GothamBold
+            
+            -- Descrição
+            local scriptDesc = Instance.new("TextLabel")
+            scriptDesc.Parent = scriptItem
+            scriptDesc.Position = UDim2.new(0, 15, 0, 30)
+            scriptDesc.Size = UDim2.new(1, -120, 0, 20)
+            scriptDesc.BackgroundTransparency = 1
+            scriptDesc.Text = script.desc
+            scriptDesc.TextColor3 = Color3.fromRGB(150, 150, 150)
+            scriptDesc.TextSize = 11
+            scriptDesc.TextXAlignment = Enum.TextXAlignment.Left
+            scriptDesc.Font = Enum.Font.Gotham
+            
+            -- Botão executar
+            local executeBtn = Instance.new("TextButton")
+            executeBtn.Parent = scriptItem
+            executeBtn.AnchorPoint = Vector2.new(1, 0)
+            executeBtn.Position = UDim2.new(1, -10, 0, 10)
+            executeBtn.Size = UDim2.new(0, 80, 0, 50)
+            executeBtn.BackgroundColor3 = Color3.fromRGB(60, 150, 60)
+            executeBtn.Text = "▶ Execute"
+            executeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+            executeBtn.TextSize = 11
+            executeBtn.Font = Enum.Font.GothamBold
+            
+            local executeCorner = Instance.new("UICorner")
+            executeCorner.CornerRadius = UDim.new(0, 4)
+            executeCorner.Parent = executeBtn
+            
+            -- Evento do botão
+            executeBtn.MouseButton1Click:Connect(function()
+                executeBtn.BackgroundColor3 = Color3.fromRGB(40, 120, 40)
+                executeBtn.Text = "✓ Done"
+                
+                -- Executar o script
+                pcall(function()
+                    loadstring(script.code)()
+                end)
+                
+                wait(2)
+                executeBtn.BackgroundColor3 = Color3.fromRGB(60, 150, 60)
+                executeBtn.Text = "▶ Execute"
+            end)
+        end
+        
+        -- Atualizar canvas size
+        scriptsFrame.CanvasSize = UDim2.new(0, 0, 0, scriptsList.AbsoluteContentSize.Y)
+        
+        -- Evento fechar hub
+        hubCloseButton.MouseButton1Click:Connect(function()
+            hubGui:Destroy()
+        end)
+        
+        print("Hub Premium carregado com sucesso!")
+    end
+    
+    -- Eventos dos botões
+    inputButton.MouseButton1Click:Connect(function()
+        local inputKey = keyInput.Text
+        
+        if inputKey == "" then
+            keyStatus.Text = "❌ Por favor, insira uma chave!"
+            keyStatus.TextColor3 = Color3.fromRGB(255, 100, 100)
+            return
+        end
+        
+        if isValidKey(inputKey) then
+            keyStatus.Text = "✅ Chave válida! Carregando hub..."
+            keyStatus.TextColor3 = Color3.fromRGB(100, 255, 100)
+            
+            wait(1.5)
+            createMainHub()
+        else
+            keyStatus.Text = "❌ Chave inválida! Tente novamente."
+            keyStatus.TextColor3 = Color3.fromRGB(255, 100, 100)
+            keyInput.Text = ""
+        end
+    end)
+    
+    -- Enter key para input
+    keyInput.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            inputButton.MouseButton1Click:Fire()
+        end
+    end)
+    
+    closeButton.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
+    
+    -- Minimizar
+    local minimized = false
+    minimizeButton.MouseButton1Click:Connect(function()
+        if minimized then
+            mainFrame:TweenSize(UDim2.new(0, 600, 0, 350), "Out", "Quad", 0.3)
+            minimized = false
+        else
+            mainFrame:TweenSize(UDim2.new(0, 600, 0, 45), "Out", "Quad", 0.3)
+            minimized = true
+        end
+    end)
+    
+    -- Animação de entrada
+    mainFrame.Size = UDim2.new(0, 0, 0, 0)
+    mainFrame:TweenSize(UDim2.new(0, 600, 0, 350), "Out", "Back", 0.5)
+    
+    print("Hub Key System carregado!")
+    print("Chaves válidas: SCRIPTHUB2024, PREMIUM123, VIPACCESS, ARTHUB2024")
+end
+
+-- Inicializar sistema
+createKeySystem()
+
+-- Tecla para reabrir (INSERT)
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    
+    if input.KeyCode == Enum.KeyCode.Insert then
+        local existingGui = playerGui:FindFirstChild("HubKeySystem")
+        if existingGui then
+            existingGui:Destroy()
+        else
+            createKeySystem()
+        end
+    end
+end)
